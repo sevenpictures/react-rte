@@ -78,6 +78,9 @@ export default class EditorToolbar extends Component {
         case 'BLOCK_TYPE_BUTTONS': {
           return this._renderBlockTypeButtons(groupName, toolbarConfig);
         }
+        case 'MEDIA_BUTTONS': {
+          return this._renderMediaButtons(groupName, toolbarConfig);
+        }
         case 'HISTORY_BUTTONS': {
           return this._renderUndoRedo(groupName, toolbarConfig);
         }
@@ -195,6 +198,35 @@ export default class EditorToolbar extends Component {
       </ButtonGroup>
     );
   }
+
+  _renderMediaButtons(name: string, toolbarConfig: ToolbarConfig) {
+    let {editorState} = this.props;
+
+    return (
+      <ButtonGroup key={name}>
+        <IconButton
+          label="Image"
+          iconName="image"
+          onClick={this._onImageClick} />
+        <IconButton
+         label="Video"
+         iconName="video"
+         onClick={this._onVideoClick} />
+      </ButtonGroup>
+    )
+  }
+
+  _onImageClick() {
+    console.log('EditorToolbar._onImageClick.arguments', arguments);
+
+  }
+
+  _onVideoClick() {
+    console.log('EditorToolbar._onImageClick.arguments', arguments);
+
+  }
+
+
 
   _onKeypress(event: Object, eventFlags: Object) {
     // Catch cmd+k for use with link insertion.

@@ -13,7 +13,7 @@ type State = {
 console.log('SevenEditor.RichTextEditor', RichTextEditor);
 const toolbarConfig = {
 	// Optionally specify the groups to display (displayed in the order listed).
-	display: ['INLINE_STYLE_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'LINK_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
+	display: ['INLINE_STYLE_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'LINK_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'MEDIA_BUTTONS', 'HISTORY_BUTTONS'],
 	INLINE_STYLE_BUTTONS: [
 		{label: 'Bold', style: 'BOLD', className: 'custom-css-class'},
 		{label: 'Italic', style: 'ITALIC'},
@@ -28,7 +28,7 @@ const toolbarConfig = {
 	BLOCK_TYPE_BUTTONS: [
 		{label: 'UL', style: 'unordered-list-item'},
 		{label: 'OL', style: 'ordered-list-item'}
-	]
+	],
 };
 
 export default class SevenEditor extends Component {
