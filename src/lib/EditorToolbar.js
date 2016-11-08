@@ -235,12 +235,12 @@ export default class EditorToolbar extends Component {
 
          <Modal isOpen={imageModalOpen} onRequestClose={this._closeModals} >
             <h3>Image Upload</h3>
+            <button onClick={() => this._upload(this.refs._dropzone_image, onImageUpload)}>upload</button>
+            <button onClick={this._closeModals}>close</button>
 
             {/* <Dropzone accept="image/*" multiple ref={(node) => this._dropzone_image = node} /> */}
             <Dropzone accept="image/*" multiple ref="_dropzone_image" />
 
-            <button onClick={() => this._upload(this.refs._dropzone_image, onImageUpload)}>upload</button>
-            <button onClick={this._cloasModals}>close</button>
          </Modal>
          {/* TODO: video modal */}
       </ButtonGroup>
@@ -272,15 +272,6 @@ export default class EditorToolbar extends Component {
 
   _toggleVideoModal() {
     this.setState({ videoModalOpen: !this.state.videoModalOpen })
-  }
-
-  async _onFileChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const { sourceURL } = await upload_file(file)
-
-    console.log(`sourceURL: ${sourceURL}`);
   }
 
   _onKeypress(event: Object, eventFlags: Object) {
