@@ -1,6 +1,6 @@
 /* @flow */
 import React, {Component} from 'react';
-import {CompositeDecorator, Editor, EditorState, Modifier, RichUtils} from 'draft-js';
+import {CompositeDecorator, Editor, EditorState, Modifier, RichUtils, Entity} from 'draft-js';
 import getDefaultKeyBinding from 'draft-js/lib/getDefaultKeyBinding';
 import changeBlockDepth from './lib/changeBlockDepth';
 import changeBlockType from './lib/changeBlockType';
@@ -10,11 +10,13 @@ import isSoftNewlineEvent from 'draft-js/lib/isSoftNewlineEvent';
 import EditorToolbar from './lib/EditorToolbar';
 import EditorValue from './lib/EditorValue';
 import LinkDecorator from './lib/LinkDecorator';
+import getBlocksInSelection from './lib/getBlocksInSelection';
+import ImageDecorator from './lib/ImageDecorator';
 import composite from './lib/composite';
 import cx from 'classnames';
 import autobind from 'class-autobind';
 import EventEmitter from 'events';
-import {BLOCK_TYPE} from 'draft-js-utils';
+import {BLOCK_TYPE, ENTITY_TYPE} from 'draft-js-utils';
 
 import './Draft.global.css';
 import styles from './RichTextEditor.css';
@@ -109,6 +111,9 @@ export default class RichTextEditor extends Component {
           onChange={this._onChange}
           focusEditor={this._focus}
           toolbarConfig={toolbarConfig}
+          onImageUpload={this._onImageUpload}
+          onVideoUpload={this._onVideoUpload}
+          onAudioUpload={this._onAudioUpload}
         />
       );
     }
@@ -270,14 +275,66 @@ export default class RichTextEditor extends Component {
 
   _onChange(editorState: EditorState) {
     let {onChange, value} = this.props;
-    if (onChange != null) {
-      let newValue = value.setEditorState(editorState);
-      onChange(newValue);
+    if (onChange == null) {
+      return;
     }
+
+    let newValue = value.setEditorState(editorState);
+    let newEditorState = newValue.getEditorState();
+    this._handleInlineImageSelection(newEditorState);
+    onChange(newValue);
+  }
+
+  _handleInlineImageSelection(editorState) {
+    let selection = editorState.getSelection();
+    let blocks = getBlocksInSelection(editorState);
+
+    const selectImage = (block, offset) => {
+      const imageKey = block.getEntityAt(offset);
+      Entity.mergeData(imageKey, {selected: true});
+    };
+
+    let isInMiddleBlock = (index) => index > 0 && index < blocks.size - 1;
+    let isWithinStartBlockSelection = (offset, index) => (
+      index === 0 && offset > selection.getStartOffset()
+    );
+    let isWithinEndBlockSelection = (offset, index) => (
+      index === blocks.size - 1 && offset < selection.getEndOffset()
+    );
+
+    blocks.toIndexedSeq().forEach((block, index) => {
+      ImageDecorator.strategy(
+        block,
+        (offset) => {
+          if (isWithinStartBlockSelection(offset, index) ||
+              isInMiddleBlock(index) ||
+              isWithinEndBlockSelection(offset, index)) {
+            selectImage(block, offset);
+          }
+        });
+    });
   }
 
   _focus() {
     this.refs.editor.focus();
+  }
+
+  _onImageUpload(sourceURLs) {
+    let editorState = this.props.value.getEditorState();
+    let pre = editorState, post;
+
+    sourceURLs.forEach(src => {
+      let selection = editorState.getSelection();
+      let contentState = editorState.getCurrentContent();
+      let entityKey = Entity.create(ENTITY_TYPE.IMAGE, 'IMMUTABLE', {src});
+      const updatedContent = Modifier.insertText(contentState, selection, ' ', null, entityKey);
+      editorState = EditorState.push(editorState, updatedContent)
+      post = editorState;
+    })
+
+    console.log('Changed?', JSON.stringify(pre.toJS()) !== JSON.stringify(post.toJS()));
+
+    this._onChange(editorState)
   }
 }
 
