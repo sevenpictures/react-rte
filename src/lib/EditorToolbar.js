@@ -21,6 +21,13 @@ import styles from './EditorToolbar.css';
 import type EventEmitter from 'events';
 import type {ToolbarConfig} from './EditorToolbarConfig';
 
+/* 7pictures API */
+import { upload_file } from '~/src/react/api/AppAPI'
+
+import Modal from 'react-modal';
+import Dropzone from '~/src/react/components/Dropzone'
+
+
 type ChangeHandler = (state: EditorState) => any;
 
 type Props = {
@@ -34,6 +41,8 @@ type Props = {
 
 type State = {
   showLinkInput: boolean;
+  imageModalOpen: boolean;
+  videoModalOpen: boolean;
 };
 
 export default class EditorToolbar extends Component {
@@ -45,6 +54,8 @@ export default class EditorToolbar extends Component {
     autobind(this);
     this.state = {
       showLinkInput: false,
+      imageModalOpen: false,
+      videoModalOpen: false,
     };
   }
 
@@ -200,33 +211,77 @@ export default class EditorToolbar extends Component {
   }
 
   _renderMediaButtons(name: string, toolbarConfig: ToolbarConfig) {
-    let {editorState} = this.props;
+    let {editorState, ...otherProps} = this.props;
+    let {
+      onImageUpload
+    } = otherProps;
+    let {
+      imageModalOpen
+    } = this.state;
+    let {
+      _dropzone_image
+    } = this.refs;
 
     return (
       <ButtonGroup key={name}>
         <IconButton
           label="Image"
           iconName="image"
-          onClick={this._onImageClick} />
+          onClick={this._toggleImageModal} />
         <IconButton
          label="Video"
          iconName="video"
-         onClick={this._onVideoClick} />
+         onClick={this._toggleVideoModal} />
+
+         <Modal isOpen={imageModalOpen} onRequestClose={this._closeModals} >
+            <h3>Image Upload</h3>
+
+            {/* <Dropzone accept="image/*" multiple ref={(node) => this._dropzone_image = node} /> */}
+            <Dropzone accept="image/*" multiple ref="_dropzone_image" />
+
+            <button onClick={() => this._upload(this.refs._dropzone_image, onImageUpload)}>upload</button>
+            <button onClick={this._cloasModals}>close</button>
+         </Modal>
+         {/* TODO: video modal */}
       </ButtonGroup>
     )
   }
 
-  _onImageClick() {
-    console.log('EditorToolbar._onImageClick.arguments', arguments);
+  async _upload(node, uploadCallback) {
+    const files = node.state.acceptedFiles
+    if (!!files && files.length <= 0) return;
 
+    const results = await Promise.all(files.map(file => upload_file(file)))
+    const sourceURLs = results.map(r => r.sourceURL)
+    console.log('EditorToolbar._upload', sourceURLs);
+
+    uploadCallback(sourceURLs)
+    this._closeModals()
   }
 
-  _onVideoClick() {
-    console.log('EditorToolbar._onImageClick.arguments', arguments);
-
+  _closeModals() {
+    this.setState({
+      imageModalOpen: false,
+      videoModalOpen: false
+    })
   }
 
+  _toggleImageModal() {
+    this.setState({ imageModalOpen: !this.state.imageModalOpen })
+  }
 
+  _toggleVideoModal() {
+    this.setState({ videoModalOpen: !this.state.videoModalOpen })
+  }
+
+  async _onFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const { sourceURL } = await upload_file(file)
+
+    console.log(`sourceURL: ${sourceURL}`);
+  }
 
   _onKeypress(event: Object, eventFlags: Object) {
     // Catch cmd+k for use with link insertion.
