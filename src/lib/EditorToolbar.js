@@ -249,7 +249,10 @@ export default class EditorToolbar extends Component {
 
   async _upload(node, uploadCallback) {
     const files = node.state.acceptedFiles
-    if (!!files && files.length <= 0) return;
+    if (!!files && files.length <= 0) {
+      this._closeModals()
+      return
+    }
 
     const results = await Promise.all(files.map(file => upload_file(file)))
     const sourceURLs = results.map(r => r.sourceURL)
@@ -257,6 +260,7 @@ export default class EditorToolbar extends Component {
 
     uploadCallback(sourceURLs)
     this._closeModals()
+    this._focusEditor();    
   }
 
   _closeModals() {

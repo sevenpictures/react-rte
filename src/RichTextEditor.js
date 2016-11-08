@@ -323,18 +323,16 @@ export default class RichTextEditor extends Component {
     let editorState = this.props.value.getEditorState();
     let pre = editorState, post;
 
-    sourceURLs.forEach(src => {
+    for(let src of sourceURLs) {
       let selection = editorState.getSelection();
       let contentState = editorState.getCurrentContent();
       let entityKey = Entity.create(ENTITY_TYPE.IMAGE, 'IMMUTABLE', {src});
       const updatedContent = Modifier.insertText(contentState, selection, ' ', null, entityKey);
       editorState = EditorState.push(editorState, updatedContent)
       post = editorState;
-    })
+    }
 
-    console.log('Changed?', JSON.stringify(pre.toJS()) !== JSON.stringify(post.toJS()));
-
-    this._onChange(editorState)
+    this._onChange(post)
   }
 }
 
@@ -352,7 +350,7 @@ function defaultBlockStyleFn(block: ContentBlock): string {
   }
 }
 
-const decorator = new CompositeDecorator([LinkDecorator]);
+const decorator = new CompositeDecorator([LinkDecorator, ImageDecorator]);
 
 function createEmptyValue(): EditorValue {
   return EditorValue.createEmpty(decorator);

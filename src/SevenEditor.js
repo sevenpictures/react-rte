@@ -45,7 +45,7 @@ export default class SevenEditor extends Component {
 	}
 
 	render() {
-		const { value, readOnly } = this.state;
+		let { value, readOnly } = this.state;
 
 		return (
 			<RichTextEditor
@@ -62,7 +62,10 @@ export default class SevenEditor extends Component {
 	}
 
 	_onChange(value: EditorValue) {
+    let { onChange } = this.props;
+
 		this.setState({value});
+    if (!!onChange) onChange(value); // Send the changes up to the parent component as Editor State value(or html, marakdown format)
 	}
 
 }
