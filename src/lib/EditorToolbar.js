@@ -80,6 +80,9 @@ export default class EditorToolbar extends Component {
         case 'INLINE_STYLE_BUTTONS': {
           return this._renderInlineStyleButtons(groupName, toolbarConfig);
         }
+        case 'ALIGN_STYLE_BUTTONS': {
+          return this._renderAlignStyleButtons(groupName, toolbarConfig);
+        }
         case 'BLOCK_TYPE_DROPDOWN': {
           return this._renderBlockTypeDropdown(groupName, toolbarConfig);
         }
@@ -149,6 +152,24 @@ export default class EditorToolbar extends Component {
         isActive={currentStyle.has(type.style)}
         label={type.label}
         onToggle={this._toggleInlineStyle}
+        style={type.style}
+        className={type.className}
+      />
+    ));
+    return (
+      <ButtonGroup key={name}>{buttons}</ButtonGroup>
+    );
+  }
+
+  _renderAlignStyleButtons(name: string, toolbarConfig: ToolbarConfig) {
+    let {editorState} = this.props;
+    let currentStyle = editorState.getCurrentInlineStyle();
+    let buttons = (toolbarConfig.ALIGN_STYLE_BUTTONS || []).map((type, index) => (
+      <StyleButton
+        key={String(index)}
+        isActive={currentStyle.has(type.style)}
+        label={type.label}
+        onToggle={this._toggleAlignStyle}
         style={type.style}
         className={type.className}
       />
@@ -260,7 +281,7 @@ export default class EditorToolbar extends Component {
 
     uploadCallback(sourceURLs)
     this._closeModals()
-    this._focusEditor();    
+    this._focusEditor();
   }
 
   _closeModals() {
@@ -351,6 +372,7 @@ export default class EditorToolbar extends Component {
   }
 
   _toggleBlockType(blockType: string) {
+    console.log('_toggleBlockType.blockType', blockType);
     this.props.onChange(
       RichUtils.toggleBlockType(
         this.props.editorState,
@@ -360,10 +382,21 @@ export default class EditorToolbar extends Component {
   }
 
   _toggleInlineStyle(inlineStyle: string) {
+    console.log('_toggleInlineStyle.inlineStyle', inlineStyle);
     this.props.onChange(
       RichUtils.toggleInlineStyle(
         this.props.editorState,
         inlineStyle
+      )
+    );
+  }
+
+  _toggleAlignStyle(alignStyle: string) {
+    console.log('_toggleAlignStyle.alignStyle', alignStyle);
+    this.props.onChange(
+      RichUtils.toggleInlineStyle(
+        this.props.editorState,
+        alignStyle
       )
     );
   }
