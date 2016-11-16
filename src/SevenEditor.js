@@ -1,11 +1,14 @@
 /* @flow */
 import React, {Component} from 'react';
-import RichTextEditor, {createEmptyValue} from './RichTextEditor';
+import RichTextEditor, {createEmptyValue, createValueFromString} from './RichTextEditor';
 import autobind from 'class-autobind';
 
 import type {EditorValue} from './RichTextEditor';
 
-type Props = {};
+type Props = {
+  stringValue: String
+};
+
 type State = {
   value: EditorValue;
   readOnly: boolean;
@@ -18,11 +21,20 @@ export default class SevenEditor extends Component {
 	constructor(props) {
 		super(props);
 		autobind(this);
+
 		this.state = {
-			value: createEmptyValue(),
+			value: this._changeFormat(this.props.stringValue),
 			readOnly: false,
 		};
 	}
+
+  componentWillReceiveProps(nextProps) {
+    let {
+      stringValue
+    } = nextProps;
+
+    this.setState({ value: this._changeFormat(this.props.stringValue) });
+  }
 
 	render() {
 		let { value, readOnly } = this.state;
@@ -46,5 +58,9 @@ export default class SevenEditor extends Component {
 		this.setState({value});
     if (!!onChange) onChange(value); // Send the changes up to the parent component as Editor State value(or html, marakdown format)
 	}
+
+  _changeFormat(stringValue: String) {
+    return !!stringValue ? createValueFromString(stringValue) : createEmptyValue();
+  }
 
 }

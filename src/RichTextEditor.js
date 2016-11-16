@@ -350,7 +350,10 @@ function defaultBlockStyleFn(block: ContentBlock): string {
   }
 }
 
-const decorator = new CompositeDecorator([LinkDecorator, ImageDecorator]);
+const decorator = new CompositeDecorator([
+  LinkDecorator,
+  ImageDecorator // TODO: activate
+]);
 
 function createEmptyValue(): EditorValue {
   return EditorValue.createEmpty(decorator);
